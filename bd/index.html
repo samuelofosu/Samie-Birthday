@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden's 20th Birthday Bash 🎉✨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <style>
+        :root {
+            --primary: #FF4DA6;
+            --secondary: #8E44AD;
+            --accent1: #F1C40F;
+            --accent2: #1ABC9C;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fff8f8 0%, #f8f0ff 100%);
+            min-height: 100vh;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .birthday-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 77, 166, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .birthday-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 77, 166, 0.3);
+        }
+        
+        .friend-card {
+            transition: all 0.3s ease;
+        }
+        
+        .friend-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(142, 68, 173, 0.3);
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary);
+            opacity: 0;
+            animation: fall 5s linear infinite;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .wish-balloon {
+            position: absolute;
+            background: white;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: inset -10px -10px 0 rgba(0,0,0,0.07);
+            animation: float 200s ease-in-out infinite;
+            z-index: -99;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-500px) rotate(5deg);
+            }
+        }
+
+        .carousel-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 500px;
+        }
+        
+        .carousel-slide {
+            min-width: 30%;
+            position: relative;
+        }
+        
+        .carousel-image {
+            /* width: 100%; */
+            height: 100%;
+            object-fit: cover;
+            min-width: 100%;
+        }
+        
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 30px;
+        }
+        
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        
+        .carousel-btn {
+            background: rgba(255,255,255,0.7);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-track {
+                height: 400px;
+            }
+
+            .carousel-slide {
+            min-width: 100%;
+            position: relative;
+        }
+            
+            .carousel-caption {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="relative py-20 px-4 text-center overflow-hidden">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 gradient-text">
+                Golden's 20th Birthday
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-700 mb-10">
+                Counting down to the most magical day of the year!
+            </p>
+            
+            <div id="countdown" class="flex justify-center gap-4 mb-16">
+                <div class="birthday-card px-6 py-4">
+                    <div class="text-4xl md:text-6xl font-bold" id="days">00</div>
+                    <div class="text-gray-600">Days</div>
+                </div>
+                <div class="birthday-card px-6 py-4">
+                    <div class="text-4xl md:text-6xl font-bold" id="hours">00</div>
+                    <div class="text-gray-600">Hours</div>
+                </div>
+                <div class="birthday-card px-6 py-4">
+                    <div class="text-4xl md:text-6xl font-bold" id="minutes">00</div>
+                    <div class="text-gray-600">Minutes</div>
+                </div>
+                <div class="birthday-card px-6 py-4">
+                    <div class="text-4xl md:text-6xl font-bold" id="seconds">00</div>
+                    <div class="text-gray-600">Seconds</div>
+                </div>
+            </div>
+            
+            <div id="birthday-message" class="hidden">
+                <h2 class="text-5xl md:text-7xl font-bold mb-6 text-pink-500">
+                    Happy 20th Birthday Golden! 🎉✨
+                </h2>
+                <button onclick="triggerConfetti()" class="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-bold hover:shadow-lg transition-all">
+                    More Confetti!
+                </button>
+            </div>
+        </div>
+        
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none" id="confetti-container"></div>
+    </section>
+    
+    <!-- Friends Gallery -->
+
+    <section class="py-16 px-4">
+        <div class="carousel-container">
+            <div class="carousel-track">
+                <div class="carousel-slide">
+                    <img src="image1.jpg" alt="Nature landscape" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Beautiful Nature</h2> -->
+                        <p class="text-lg">Life is just one big loop — happy birthday!</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img2.jpg" alt="City view" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Urban Life</h2> -->
+                        <p class="text-lg">Console.log(“Happy Birthday Golden 🎂”)</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img3.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Another year, another feature update 🎉</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img4.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Warning: Golden upgraded to v20.0. Patch notes pending</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img5.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">if (age === 20) { celebrate(); }</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img6.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Level 20 unlocked! Someone please give him the cheat codes 🎮</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img7.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">If you didn’t bring cake, don’t say “happy birthday</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img8.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">I’m not aging, I’m just leveling up. 🎮🔥</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="img9.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">I don’t need candles… I shine bright already. ✨</p>
+                    </div>  
+                </div>
+                <div class="carousel-slide">
+                    <img src="img10.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Another year closer to becoming that rich uncle</p>
+                    </div>  
+                </div>
+                <div class="carousel-slide">
+                    <img src="img11.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Age is just experience points in life’s RPG. 🎮🧙‍♂️</p>
+                    </div>  
+                </div>
+                <div class="carousel-slide">    
+                    <img src="img12.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Officially upgraded to version 20.0 — hope the bugs are fixed! 🐛😂</p>
+                    </div>          
+                </div>
+                <div class="carousel-slide">
+                    <img src="img13.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Still young, still wild, just with a little more mileage. 🚗💨</p>
+                    </div>  
+                </div>
+                <div class="carousel-slide">
+                    <img src="img14.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Birthday rule: No responsibilities, only cake.</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="gang.jpg" alt="Travel destination" class="carousel-image">
+                    <div class="carousel-caption">
+                        <!-- <h2 class="text-3xl font-bold mb-2">Adventure Awaits</h2> -->
+                        <p class="text-lg">Keep calm and birthday on! 🎉😎 Ganster Life</p>
+                    </div>
+                     </div>
+
+
+
+            </div>
+            
+            <div class="carousel-nav">
+                <button class="carousel-btn prev-btn">
+                    <i data-feather="chevron-left"></i>
+                </button>
+                <button class="carousel-btn next-btn">
+                    <i data-feather="chevron-right"></i>
+                </button>
+            </div>
+            
+            <div class="carousel-dots">
+                <div class="carousel-dot active" data-index="0"></div>
+                <div class="carousel-dot" data-index="1"></div>
+                <div class="carousel-dot" data-index="2"></div>
+            </div>
+        </div>
+    </section>
+    <!-- Wish Wall -->
+    <section class="py-16 px-4 relative overflow-hidden min-h-[400px]">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-6 gradient-text">
+                Birthday Wishes Wall
+            </h2>
+            
+            <div class="birthday-card p-6 mb-8">
+                <form id="wish-form" class="flex gap-2">
+                    <input type="text" id="wish-text" placeholder="Write a quick wish..." required class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                    <button type="submit" class="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-bold hover:shadow-lg transition-all">
+                        Send
+                    </button>
+                </form>
+            </div>
+            
+            <div id="wishes-container" class="relative h-64">
+                <!-- Wishes will float here -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-8 px-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-center">
+        <p>Made with ❤️ for Golden's Birthday</p>
+    </footer>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd0OpDE_y4IRVaXZJlD7x2xvoifgsv7QU",
+  authDomain: "birthday-site-9e042.firebaseapp.com",
+  projectId: "birthday-site-9e042",
+  storageBucket: "birthday-site-9e042.firebasestorage.app",
+  messagingSenderId: "870470874543",
+  appId: "1:870470874543:web:2f938208bd5bc56331eb5a"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage();
+        
+        // Countdown to October 25, 2025
+        const birthday = new Date('October 25, 2025 00:00:00').getTime();
+        
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = birthday - now;
+            
+            if (distance <= 0) {
+                document.getElementById('countdown').classList.add('hidden');
+                document.getElementById('birthday-message').classList.remove('hidden');
+                triggerConfetti();
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+        
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+        
+        // Confetti effect
+        function triggerConfetti() {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FF4DA6', '#8E44AD', '#F1C40F', '#1ABC9C']
+            });
+            
+            // Create falling confetti elements
+            const container = document.getElementById('confetti-container');
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                container.appendChild(confetti);
+                
+                // Remove confetti after animation completes
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Friend form submission
+       document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            
+            const track = document.querySelector('.carousel-track');
+            const slides = Array.from(document.querySelectorAll('.carousel-slide'));
+            const dots = Array.from(document.querySelectorAll('.carousel-dot'));
+            const nextBtn = document.querySelector('.next-btn');
+            const prevBtn = document.querySelector('.prev-btn');
+            
+            let currentIndex = 0;
+            const slideCount = slides.length;
+            
+            function updateCarousel() {
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // Update dots
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+            }
+            
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % slideCount;
+                updateCarousel();
+            }
+            
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + slideCount) % slideCount;
+                updateCarousel();
+            }
+            
+            // Button clicks
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            
+            // Dot clicks
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    currentIndex = parseInt(dot.dataset.index);
+                    updateCarousel();
+                });
+            });
+            
+            // Auto-advance (optional)
+            let autoSlide = setInterval(nextSlide, 5000);
+            
+            // Pause on hover
+            const container = document.querySelector('.carousel-container');
+            container.addEventListener('mouseenter', () => {
+                clearInterval(autoSlide);
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                autoSlide = setInterval(nextSlide, 5000);
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+            
+            // Touch support for mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+            
+            container.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+            
+            function handleSwipe() {
+                const threshold = 50;
+                
+                if (touchEndX < touchStartX - threshold) {
+                    nextSlide();
+                } else if (touchEndX > touchStartX + threshold) {
+                    prevSlide();
+                }
+            }
+        });
+        
+        // Wish form submission
+        document.getElementById('wish-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const wishText = document.getElementById('wish-text').value;
+            if (!wishText) return;
+            
+            try {
+                // Save wish to Realtime Database
+                const newWishRef = database.ref('wishes').push();
+                await newWishRef.set({
+                    text: wishText,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Clear input
+                document.getElementById('wish-text').value = '';
+            } catch (error) {
+                console.error('Error submitting wish:', error);
+            }
+        });
+        
+        // Display friends from Firebase
+        database.ref('friends').on('value', (snapshot) => {
+            const friends = [];
+            snapshot.forEach((childSnapshot) => {
+                friends.push(childSnapshot.val());
+            });
+            
+            const carousel = document.getElementById('friends-carousel');
+            carousel.innerHTML = '';
+            
+            friends.forEach(friend => {
+                const friendCard = document.createElement('div');
+                friendCard.className = 'friend-card snap-center flex-shrink-0 w-64 bg-white rounded-xl p-6 shadow-md';
+                friendCard.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-pink-200">
+                            ${friend.photoUrl ? 
+                                `<img src="${friend.photoUrl}" alt="${friend.name}" class="w-full h-full object-cover">` : 
+                                `<div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <i data-feather="user" class="w-12 h-12 text-gray-500"></i>
+                                </div>`
+                            }
+                        </div>
+                        <h3 class="text-xl font-bold text-center">${friend.name}</h3>
+                        <p class="text-gray-600 text-center mt-2">${friend.message}</p>
+                    </div>
+                `;
+                carousel.appendChild(friendCard);
+            });
+            
+            // Auto-scroll carousel
+            if (friends.length > 3) {
+                let scrollPos = 0;
+                setInterval(() => {
+                    scrollPos += 1;
+                    if (scrollPos >= carousel.scrollWidth - carousel.clientWidth) {
+                        scrollPos = 0;
+                    }
+                    carousel.scrollTo({
+                        left: scrollPos,
+                        behavior: 'smooth'
+                    });
+                }, 50);
+            }
+            
+            feather.replace();
+        });
+        
+        // Display wishes from Firebase
+        database.ref('wishes').on('value', (snapshot) => {
+            const wishesContainer = document.getElementById('wishes-container');
+            wishesContainer.innerHTML = '';
+            
+            snapshot.forEach((childSnapshot) => {
+                const wish = childSnapshot.val();
+                createFloatingWish(wish.text);
+            });
+        });
+        
+        // Create floating wish balloons
+        function createFloatingWish(text) {
+            const container = document.getElementById('wishes-container');
+            const balloon = document.createElement('div');
+            balloon.className = 'wish-balloon p-4 shadow-md';
+            
+            // Random size and position
+            const size = Math.random() * 100 + 100;
+            const left = Math.random() * 80;
+            const animationDuration = Math.random() * 10 + 10;
+            
+            balloon.style.width = `${size}px`;
+            balloon.style.height = `${size}px`;
+            balloon.style.left = `${left}%`;
+            balloon.style.bottom = `-${size}px`;
+            balloon.style.animationDuration = `${animationDuration}s`;
+            balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 80%)`;
+            
+            // Add text (centered)
+            const textDiv = document.createElement('div');
+            textDiv.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full px-2';
+            textDiv.textContent = text;
+            balloon.appendChild(textDiv);
+            
+            container.appendChild(balloon);
+            
+            // Remove balloon after animation completes
+            setTimeout(() => {
+                balloon.remove();
+            }, animationDuration * 1000);
+        }
+        
+        // Initialize feather icons
+        feather.replace();
+    </script>
+</body>
+</html>
