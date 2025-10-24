@@ -792,12 +792,66 @@
   }
 }
 
+
+        
+<script>
+function playBirthdaySong() {
+  const song = document.getElementById('birthday-song');
+  song.play().catch(() => {
+    // If autoplay is blocked, create a play button
+    const btn = document.createElement('button');
+    btn.textContent = "▶️ Play Birthday Song";
+    btn.className = "mt-6 px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full font-bold hover:shadow-lg transition-all";
+    btn.onclick = () => {
+      song.play();
+      btn.remove();
+    };
+    document.getElementById('birthday-message').appendChild(btn);
+  });
+}
+
+// Start and fade in song when page loads
+window.addEventListener('load', () => {
+  const song = document.getElementById('birthday-song');
+  let volume = 0;
+  song.volume = 0;
+
+  // Smooth fade-in effect
+  const fadeIn = setInterval(() => {
+    if (volume < 1) {
+      volume += 0.02;
+      song.volume = volume;
+    } else {
+      clearInterval(fadeIn);
+    }
+  }, 200);
+
+  // Scroll detection: pause or play song depending on Wishes section visibility
+  window.addEventListener('scroll', () => {
+    const wishesSection = document.querySelector('#wishes-container');
+    const sectionTop = wishesSection.getBoundingClientRect().top;
+    const windowHeight = window.innerHeight;
+
+    // If the Wishes section is in view → pause music
+    if (sectionTop < windowHeight && sectionTop > -windowHeight / 2) {
+      if (!song.paused) song.pause();
+    } else {
+      if (song.paused) song.play().catch(() => {});
+    }
+  });
+});
+</script>
+
         
         // Initialize feather icons
         feather.replace();
     </script>
+
+    <audio id="birthday-song" src="song.mp3" autoplay loop preload="auto"></audio>
+
 </body>
 </html>
+
 
 
 
