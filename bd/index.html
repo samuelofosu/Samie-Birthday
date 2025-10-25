@@ -84,18 +84,11 @@
             background: white;
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             box-shadow: inset -10px -10px 0 rgba(0,0,0,0.07);
-            animation: float 200s ease-in-out infinite;
+            /* animation: float 200s ease-in-out infinite; */
             z-index: -99;
         }
         
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-500px) rotate(5deg);
-            }
-        }
+        
 
         .carousel-container {
             width: 100%;
@@ -202,6 +195,22 @@
                 padding: 20px;
             }
         }
+
+        .wish-balloon {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  word-wrap: break-word;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: inset -10px -10px 0 rgba(0, 0, 0, 0.07);
+  color: #333;
+  font-weight: 600;
+  z-index: 1;
+}
+
     </style>
 </head>
 <body class="min-h-screen">
@@ -776,35 +785,46 @@
         
         // Create floating wish balloons
         function createFloatingWish(text) {
-            const container = document.getElementById('wishes-container');
-            const balloon = document.createElement('div');
-            balloon.className = 'wish-balloon p-4 shadow-md';
-            
-            // Random size and position
-            const size = Math.random() * 100 + 100;
-            const left = Math.random() * 80;
-            const animationDuration = Math.random() * 10 + 10;
-            
-            balloon.style.width = `${size}px`;
-            balloon.style.height = `${size}px`;
-            balloon.style.left = `${left}%`;
-            balloon.style.bottom = `-${size}px`;
-            balloon.style.animationDuration = `${animationDuration}s`;
-            balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 80%)`;
-            
-            // Add text (centered)
-            const textDiv = document.createElement('div');
-            textDiv.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full px-2';
-            textDiv.textContent = text;
-            balloon.appendChild(textDiv);
-            
-            container.appendChild(balloon);
-            
-            // Remove balloon after animation completes
-            setTimeout(() => {
-                balloon.remove();
-            }, animationDuration * 1000);
-        }
+  const container = document.getElementById('wishes-container');
+  const balloon = document.createElement('div');
+  balloon.className = 'wish-balloon';
+
+  // Random size and position
+  const size = Math.random() * 70 + 80; // 80–150px
+  const startX = Math.random() * window.innerWidth;
+  const startY = Math.random() * window.innerHeight;
+  balloon.style.width = `${size}px`;
+  balloon.style.height = `${size}px`;
+  balloon.style.left = `${startX}px`;
+  balloon.style.top = `${startY}px`;
+  balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 80%)`;
+  balloon.style.position = 'fixed';
+  balloon.style.transition = 'transform 6s ease-in-out';
+  
+  // Text inside balloon
+  const textDiv = document.createElement('div');
+  textDiv.style.padding = '8px';
+  textDiv.style.fontSize = `${Math.max(12, size / 7)}px`; // responsive text
+  textDiv.textContent = text;
+  balloon.appendChild(textDiv);
+  container.appendChild(balloon);
+
+  // Random motion pattern
+  let direction = 1;
+  function floatLoop() {
+    const randomX = (Math.random() - 0.5) * 200; // left/right drift
+    const randomY = direction * (Math.random() * -200); // up/down
+    const rotate = Math.random() * 20 - 10;
+
+    balloon.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${rotate}deg)`;
+
+    // Reverse direction every few seconds
+    direction *= -1;
+    setTimeout(floatLoop, 4000 + Math.random() * 2000);
+  }
+
+  floatLoop();
+}
 
         function clearAllWishes() {
   if (confirm("Are you sure you want to delete all birthday wishes?")) {
@@ -878,6 +898,7 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
+
 
 
 
